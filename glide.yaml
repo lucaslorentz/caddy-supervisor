@@ -1,0 +1,12 @@
+package: github.com/lucaslorentz/caddy-process
+import:
+- package: github.com/caddyserver/dnsproviders
+  version: ^0.1.1
+  subpackages:
+  - route53
+- package: github.com/mholt/caddy
+  version: ^0.10.10
+  subpackages:
+  - caddy/caddymain
+- package: github.com/NetWatcher/service
+- package: github.com/lucaslorentz/caddy-service

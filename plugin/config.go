@@ -15,8 +15,8 @@ type runOptions struct {
 	terminationGracePeriod time.Duration
 }
 
-func createRunOptions() runOptions {
-	return runOptions{
+func createRunOptions() *runOptions {
+	return &runOptions{
 		terminationGracePeriod: 10 * time.Second,
 	}
 }

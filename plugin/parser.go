@@ -7,8 +7,8 @@ import (
 	"github.com/mholt/caddy"
 )
 
-func parseOptionsList(c *caddy.Controller) ([]runOptions, error) {
-	var optionsList []runOptions
+func parseOptionsList(c *caddy.Controller) ([]*runOptions, error) {
+	var optionsList []*runOptions
 
 	for c.Next() {
 		options, err := parseOptions(c)
@@ -21,7 +21,7 @@ func parseOptionsList(c *caddy.Controller) ([]runOptions, error) {
 	return optionsList, nil
 }
 
-func parseOptions(c *caddy.Controller) (runOptions, error) {
+func parseOptions(c *caddy.Controller) (*runOptions, error) {
 	var options = createRunOptions()
 
 	args := c.RemainingArgs()

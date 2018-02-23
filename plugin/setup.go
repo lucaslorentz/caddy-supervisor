@@ -16,7 +16,7 @@ func init() {
 	})
 }
 
-var executors []executor
+var executors []*executor
 
 // setup used internally by Caddy to set up this middleware
 func setup(c *caddy.Controller) error {
@@ -52,7 +52,7 @@ func shutdownExecutions() error {
 
 	for _, e := range executors {
 		wg.Add(1)
-		go func(e executor) {
+		go func(e *executor) {
 			defer wg.Done()
 			e.cancel()
 		}(e)

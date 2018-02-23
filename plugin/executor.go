@@ -12,7 +12,7 @@ type executor struct {
 	cancel func()
 }
 
-func createExecutor(options runOptions) executor {
+func createExecutor(options *runOptions) *executor {
 	var cmd *exec.Cmd
 	maxRestartDelay := 5 * time.Minute
 	minRestartDelay := 10 * time.Second
@@ -104,7 +104,7 @@ func createExecutor(options runOptions) executor {
 		}
 	}
 
-	return executor{
+	return &executor{
 		run:    run,
 		cancel: cancel,
 	}

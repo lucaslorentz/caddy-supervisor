@@ -1,5 +1,5 @@
-hash: 2aefafb9d3d7c18104353ccfaa445129e56842c9adbe9e807e231fdb2c4deb55
-updated: 2018-02-27T10:11:08.4932748+01:00
+hash: 20bcfe98bc00001af2e87b360a202bf52e93b971fb32fd3c3561f230b1cf15f8
+updated: 2018-03-10T15:04:02.2553099+01:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
@@ -11,10 +11,6 @@ imports:
   repo: https://github.com/bifurcation/mint
   subpackages:
   - syntax
-- name: github.com/caddyserver/dnsproviders
-  version: 7f5673b9f3e2f8bad31c8a1a42c0bf05a2596b14
-  subpackages:
-  - route53
 - name: github.com/cheekybits/genny
   version: 9127e812e1e9e501ce899a18121d316ecb52e4ba
   subpackages:

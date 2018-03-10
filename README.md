@@ -75,3 +75,11 @@ example.com {
   fastcgi / localhost:9800 php
 }
 ```
+
+## Building it
+Build from caddy repository and import  **caddy-run** plugin on file https://github.com/mholt/caddy/blob/master/caddy/caddymain/run.go :
+```
+import (
+  _ "github.com/lucaslorentz/caddy-run/plugin"
+)
+```

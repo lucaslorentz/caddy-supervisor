@@ -40,10 +40,10 @@ run {
   - **always**: always restart
 - **termination_grace_period**: amount of time to wait for application graceful termination before killing it.
 
-On windows **terminationGracePeriod** is ignored and the command is killed immediatelly due to lack of signals support.
+On windows **termination_grace_period** is ignored and the command is killed immediatelly due to lack of signals support.
 
 ## Examples
-Running AspNet Core application on windows:
+AspNet Core application on windows:
 ```
 example.com {
   run {
@@ -60,18 +60,18 @@ example.com {
 }
 ```
 
-Running php fastcgi on windows:
+Php fastcgi on windows:
 ```
 example.com {
-	run {
-		command ./php-cgi.exe
-		args -b 9800
-		dir C:/php/
-		redirect_stdout stdout
-		redirect_stderr stderr
-		restart_policy always
-	}
-	root C:/Site
-	fastcgi / localhost:9800 php
+  run {
+    command ./php-cgi.exe
+    args -b 9800
+    dir C:/php/
+    redirect_stdout stdout
+    redirect_stderr stderr
+    restart_policy always
+  }
+  root C:/Site
+  fastcgi / localhost:9800 php
 }
 ```

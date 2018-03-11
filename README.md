@@ -27,18 +27,17 @@ run {
 }
 ```
 
-- **env**: sets environment variable for the process
 - **command**: the command or executable name to be executed
 - **args**: args provided to the command, separated by whitespace
 - **dir**: the working directory the command should be executed in
 - **env**: declare environment variable that should be passed to command. This property can be repeated
 - **redirect_stdout**: redirect command stdout to a file. Use "stdout" to redirect to caddy stdout
 - **redirect_stderr**: redirect command stderr to a file. Use "stderr" to redirect to caddy stderr
-- **restart_policy**: define under which conditions the command should be restarted after exit. Possible values:
+- **restart_policy**: define under which conditions the command should be restarted after exit. Valid values:
   - **never**: do not restart the command
   - **on_failure**: restart if exit code is not 0
   - **always**: always restart
-- **termination_grace_period**: amount of time to wait for application graceful termination before killing it.
+- **termination_grace_period**: amount of time to wait for application graceful termination before killing it. Ex: 10s
 
 On windows **termination_grace_period** is ignored and the command is killed immediatelly due to lack of signals support.
 

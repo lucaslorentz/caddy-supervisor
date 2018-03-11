@@ -7,9 +7,9 @@ This plugin enables caddy to run executables as background processes.
 For every **run** caddy directive a command is executed in background and killed when caddy stops.
 
 ## Caddyfile syntax
-The simplest configuration requires only to specify the command the args:
+The simplest configuration requires only to specify the command and args:
 ```
-run command args
+run command arg1 arg2 arg3
 ```
 
 Use a block for more control:

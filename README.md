@@ -41,6 +41,14 @@ run {
 
 On windows **termination_grace_period** is ignored and the command is killed immediatelly due to lack of signals support.
 
+## Exponential backoff
+To avoid spending too many resources on a crashing application, this plugin makes use of exponential backoff.
+
+That means that when the command exits, it will be restarted with a delay of 10 seconds.
+On every successive exit, the delay time doubles, with a max limit of 5 minutes.
+
+If the command runs stable for at least 10 minutes, the restart delay is reset to 10 seconds.
+
 ## Examples
 AspNet Core application on windows:
 ```

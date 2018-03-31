@@ -1,0 +1,10 @@
+localhost {
+    supervisor ping google.com {
+        redirect_stdout stdout
+        restart_policy always
+    }
+
+    supervisor echo "Hello World" {
+        redirect_stdout stdout
+    }
+}

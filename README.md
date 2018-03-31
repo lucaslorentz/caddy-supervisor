@@ -1,20 +1,22 @@
-# CADDY-RUN [![Build Status](https://travis-ci.org/lucaslorentz/caddy-run.svg?branch=master)](https://travis-ci.org/lucaslorentz/caddy-run)
+# caddy-supervisor [![Build Status](https://travis-ci.org/lucaslorentz/caddy-supervisor.svg?branch=master)](https://travis-ci.org/lucaslorentz/caddy-supervisor)
 
 ## Introduction
-This plugin enables caddy to run executables as background processes.
+This plugin enables caddy to run and supervise background processes.
 
 ## How it works
-For every **run** caddy directive a command is executed in background and killed when caddy stops.
+For every **supervisor** caddy directive a command is executed in background and killed when caddy stops.
 
-## Caddyfile syntax
-The simplest configuration requires only to specify the command and args:
+You can use **supervisor** plugin as an http directive or as a server type.
+
+## Supervisor http directive
+You can activate a supervisor directly from your web caddyfile using:
 ```
-run command arg1 arg2 arg3
+supervisor command arg1 arg2 arg3
 ```
 
-Use a block for more control:
+Or using a block for more control
 ```
-run {
+supervisor {
   command command
   args arg1 arg2 arg3
   dir directory
@@ -26,6 +28,30 @@ run {
   termination_grace_period period
 }
 ```
+
+## Supervisor server type
+You can also use a supervisor server type using `-type` CLI option:
+```
+caddy -type supervisor
+```
+
+The Caddyfile syntax for supervisor server type is:
+```
+name {
+  command command
+  args arg1 arg2 arg3
+  dir directory
+  env VARIABLEA=VALUEA
+  env VARIABLEB=VALUEB
+  redirect_stdout file
+  redirect_stderr file
+  restart_policy policy
+  termination_grace_period period
+}
+...
+```
+
+## Options description
 
 - **command**: the command or executable name to be executed
 - **args**: args provided to the command, separated by whitespace
@@ -84,9 +110,10 @@ example.com {
 ```
 
 ## Building it
-Build from caddy repository and import  **caddy-run** plugin on file https://github.com/mholt/caddy/blob/master/caddy/caddymain/run.go :
+Build from caddy repository and import  **caddy-supervisor** plugin on file https://github.com/mholt/caddy/blob/master/caddy/caddymain/run.go :
 ```
 import (
-  _ "github.com/lucaslorentz/caddy-run/plugin"
+  _ "github.com/lucaslorentz/caddy-supervisor/httpplugin"
+  _ "github.com/lucaslorentz/caddy-supervisor/servertype"
 )
 ```

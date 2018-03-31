@@ -1,0 +1,12 @@
+ping {
+    command ping
+    args google.com
+    redirect_stdout stdout
+    restart_policy always
+}
+
+echo {
+    command echo
+    args "Hello World"
+    redirect_stdout stdout
+}

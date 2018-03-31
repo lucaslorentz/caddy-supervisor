@@ -1,37 +1,34 @@
-package plugin
+package httpplugin
 
 import (
-	"log"
 	"sync"
 
+	"github.com/lucaslorentz/caddy-supervisor/supervisor"
 	"github.com/mholt/caddy"
 )
 
 func init() {
-	log.Println("Registering plugin")
-
-	caddy.RegisterPlugin("run", caddy.Plugin{
+	caddy.RegisterPlugin("supervisor", caddy.Plugin{
 		ServerType: "http",
 		Action:     setup,
 	})
 }
 
-var executors []*executor
+var supervisors []*supervisor.Supervisor
 
-// setup used internally by Caddy to set up this middleware
 func setup(c *caddy.Controller) error {
 	setupEventsOnlyOnce(c)
 
 	return c.OncePerServerBlock(func() error {
-		optionsList, err := parseOptionsList(c)
+		optionsList, err := parseHTTPDirectives(c)
 		if err != nil {
 			return err
 		}
 
 		for _, options := range optionsList {
-			executor := createExecutor(options)
-			executors = append(executors, executor)
-			go executor.run()
+			supervisor := supervisor.CreateSupervisor(options)
+			supervisors = append(supervisors, supervisor)
+			supervisor.Start()
 		}
 		return nil
 	})
@@ -50,12 +47,12 @@ func setupEventsOnlyOnce(c *caddy.Controller) {
 func shutdownExecutions() error {
 	var wg sync.WaitGroup
 
-	for _, e := range executors {
+	for _, s := range supervisors {
 		wg.Add(1)
-		go func(e *executor) {
+		go func(s *supervisor.Supervisor) {
 			defer wg.Done()
-			e.cancel()
-		}(e)
+			s.Stop()
+		}(s)
 	}
 
 	wg.Wait()

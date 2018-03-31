@@ -1,4 +1,4 @@
-package: github.com/lucaslorentz/caddy-process
+package: github.com/lucaslorentz/caddy-supervisor
 import:
 - package: github.com/mholt/caddy
   version: ^0.10.11

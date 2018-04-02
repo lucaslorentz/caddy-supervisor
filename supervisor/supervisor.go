@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	maxRestartDelay = 5 * time.Minute
-	minRestartDelay = 10 * time.Second
+	maxRestartDelay             = 5 * time.Minute
+	minRestartDelay             = 10 * time.Second
+	durationToResetRestartDelay = 10 * time.Minute
 )
 
 // Supervisor provides functionality to start and supervise a background process
@@ -34,7 +35,6 @@ func (s *Supervisor) Start() {
 
 func (s *Supervisor) supervise() {
 	restartDelay := minRestartDelay
-	durationToResetRestartDelay := 10 * time.Minute
 
 	for s.keepRunning {
 		s.cmd = exec.Command(s.options.Command, s.options.Args...)
@@ -69,32 +69,30 @@ func (s *Supervisor) supervise() {
 			break
 		}
 
-		if duration > durationToResetRestartDelay {
-			log.Printf("Resetting restart delay to %v\n", minRestartDelay)
-			restartDelay = minRestartDelay
-		}
-
-		mustRestart := false
-
 		switch s.options.RestartPolicy {
 		case RestartAlways:
-			mustRestart = true
 			break
 		case RestartOnFailure:
-			mustRestart = err != nil
+			if err == nil {
+				s.keepRunning = false
+			}
+			break
+		case RestartNever:
+			s.keepRunning = false
 			break
 		}
 
-		if mustRestart {
-			log.Printf("Restarting in %v\n", restartDelay)
-			time.Sleep(restartDelay)
-
-			restartDelay = restartDelay * 2
-			if restartDelay > maxRestartDelay {
-				restartDelay = maxRestartDelay
+		if s.keepRunning {
+			if restartDelay > minRestartDelay && (err == nil || duration > durationToResetRestartDelay) {
+				log.Printf("Resetting restart delay to %v\n", minRestartDelay)
+				restartDelay = minRestartDelay
 			}
-		} else {
-			s.keepRunning = false
+
+			if err != nil {
+				log.Printf("Restarting in %v\n", restartDelay)
+				time.Sleep(restartDelay)
+				restartDelay = increaseRestartDelay(restartDelay)
+			}
 		}
 	}
 }
@@ -140,4 +138,14 @@ func getFile(value string) *os.File {
 		}
 		return outFile
 	}
+}
+
+func increaseRestartDelay(restartDelay time.Duration) time.Duration {
+	restartDelay = restartDelay * 2
+
+	if restartDelay > maxRestartDelay {
+		restartDelay = maxRestartDelay
+	}
+
+	return restartDelay
 }

@@ -6,5 +6,6 @@ localhost {
 
     supervisor echo "Hello World" {
         redirect_stdout stdout
+        restart_policy on_failure
     }
 }

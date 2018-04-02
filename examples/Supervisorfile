@@ -9,4 +9,5 @@ echo {
     command echo
     args "Hello World"
     redirect_stdout stdout
+    restart_policy on_failure
 }

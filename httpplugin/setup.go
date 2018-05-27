@@ -26,9 +26,11 @@ func setup(c *caddy.Controller) error {
 		}
 
 		for _, options := range optionsList {
-			supervisor := supervisor.CreateSupervisor(options)
-			supervisors = append(supervisors, supervisor)
-			supervisor.Start()
+			newSupervisors := supervisor.CreateSupervisors(options)
+			supervisors = append(supervisors, newSupervisors...)
+			for _, supervisor := range newSupervisors {
+				go supervisor.Start()
+			}
 		}
 		return nil
 	})

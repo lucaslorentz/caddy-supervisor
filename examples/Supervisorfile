@@ -7,7 +7,8 @@ ping {
 
 echo {
     command echo
-    args "Hello World"
+    args "Hello World {{.Replica}}"
     redirect_stdout stdout
     restart_policy on_failure
+    replicas 5
 }

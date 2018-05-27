@@ -19,6 +19,7 @@ func init() {
 		"restart_policy",
 		"termination_grace_period",
 		"env",
+		"replicas",
 	}
 
 	caddy.RegisterServerType("supervisor", caddy.ServerType{
@@ -63,9 +64,11 @@ var supervisors []*supervisor.Supervisor
 // MakeServers uses the newly-created configs to create and return a list of server instances.
 func (n *supervisorContext) MakeServers() ([]caddy.Server, error) {
 	for _, options := range n.options {
-		supervisor := supervisor.CreateSupervisor(options)
-		supervisors = append(supervisors, supervisor)
-		supervisor.Start()
+		newSupervisors := supervisor.CreateSupervisors(options)
+		supervisors = append(supervisors, newSupervisors...)
+		for _, supervisor := range newSupervisors {
+			go supervisor.Start()
+		}
 	}
 	return nil, nil
 }

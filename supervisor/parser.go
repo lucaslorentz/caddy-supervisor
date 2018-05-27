@@ -2,6 +2,7 @@ package supervisor
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/mholt/caddy"
@@ -83,6 +84,19 @@ func ParseOption(c *caddy.Controller, options *Options) {
 			options.Env = append(options.Env, args[0])
 		} else {
 			log.Printf("Option 'env' expects 1 argument in format KEY=VALUE\n")
+		}
+		break
+	case "replicas":
+		args := c.RemainingArgs()
+		if len(args) == 1 {
+			replicas, err := strconv.Atoi(args[0])
+			if err == nil {
+				options.Replicas = replicas
+			} else {
+				log.Printf("Invalid 'replicas' value %v\n", args[0])
+			}
+		} else {
+			log.Printf("Option 'replicas' expects 1 argument\n")
 		}
 		break
 	}

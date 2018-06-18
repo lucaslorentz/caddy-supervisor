@@ -1,11 +1,13 @@
-hash: 20bcfe98bc00001af2e87b360a202bf52e93b971fb32fd3c3561f230b1cf15f8
-updated: 2018-03-10T15:04:02.2553099+01:00
+hash: 1f8aba5642f9a1fbde3188900586a57ba654f63dd5ca3e04961726fcac7b0714
+updated: 2018-05-27T23:32:59.1440126+02:00
 imports:
 - name: github.com/aead/chacha20
   version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
   repo: https://github.com/aead/chacha20
   subpackages:
   - chacha
+- name: github.com/aokoli/goutils
+  version: 3391d3790d23d03408670993e957e8f408993c34
 - name: github.com/bifurcation/mint
   version: 64af8ab8ccb81bd5d4eab356f79ba0939117d9f6
   repo: https://github.com/bifurcation/mint
@@ -15,9 +17,6 @@ imports:
   version: 9127e812e1e9e501ce899a18121d316ecb52e4ba
   subpackages:
   - generic
-- name: github.com/codahale/aesnicheck
-  version: 349fcc471aaccc29cd074e1275f1a494323826cd
-  repo: https://github.com/codahale/aesnicheck
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
   repo: https://github.com/dustin/go-humanize
@@ -25,13 +24,15 @@ imports:
   version: 3f9db97f856818214da2e1057f8ad84803971cff
   repo: https://github.com/flynn/go-shlex
 - name: github.com/google/uuid
-  version: 7e072fc3a7be179aee6d3359e46015aa8c995314
+  version: dec09d789f3dba190787f8b4454c7d3c936fed9e
   repo: https://github.com/google/uuid
 - name: github.com/gorilla/websocket
   version: a69d9f6de432e2c6b296a947d8a5ee88f68522cf
   repo: https://github.com/gorilla/websocket
 - name: github.com/guelfey/go.dbus
   version: f6a3a2366cc39b8479cadc499d3c735fb10fbdda
+- name: github.com/hacdias/caddy-service
+  version: 3fecbe69fdf6b58275b519348b44598a6a9cc4d9
 - name: github.com/hashicorp/go-syslog
   version: 326bf4a7f709d263f964a6a96558676b103f3534
   repo: https://github.com/hashicorp/go-syslog
@@ -40,6 +41,10 @@ imports:
   repo: https://github.com/hashicorp/golang-lru
   subpackages:
   - simplelru
+- name: github.com/huandu/xstrings
+  version: 2bf18b218c51864a87384c06996e40ff9dcff8e1
+- name: github.com/imdario/mergo
+  version: 7fe0c75c13abdee74b09fcacef5ea1c6bba6a874
 - name: github.com/jimstudt/http-authentication
   version: 3eca13d6893afd7ecabe15f4445f5d2872a1b012
   repo: https://github.com/jimstudt/http-authentication
@@ -47,14 +52,14 @@ imports:
   - basic
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
+- name: github.com/klauspost/cpuid
+  version: ae832f27941af41db13bd6d8efd2493e3b22415a
+  repo: https://github.com/klauspost/cpuid
 - name: github.com/lucas-clemente/aes12
-  version: 25700e67be5c860bcc999137275b9ef8b65932bd
+  version: cd47fb39b79f867c6e4e5cd39cf7abd799f71670
   repo: https://github.com/lucas-clemente/aes12
-- name: github.com/lucas-clemente/fnv128a
-  version: 393af48d391698c6ae4219566bfbdfef67269997
-  repo: https://github.com/lucas-clemente/fnv128a
 - name: github.com/lucas-clemente/quic-go
-  version: d71850eb2ff581620f2f5742b558a97de22c13f6
+  version: da7708e47066ab0aff0f20f66b21c1f329db1eff
   repo: https://github.com/lucas-clemente/quic-go
   subpackages:
   - h2quic
@@ -70,10 +75,12 @@ imports:
 - name: github.com/lucas-clemente/quic-go-certificates
   version: d2f86524cced5186554df90d92529757d22c1cb6
   repo: https://github.com/lucas-clemente/quic-go-certificates
-- name: github.com/lucaslorentz/caddy-service
-  version: fb5a98662299200d4f38bc4098dc36f4d73f11a8
+- name: github.com/Masterminds/semver
+  version: 59c29afe1a994eacb71c833025ca7acf874bb1da
+- name: github.com/Masterminds/sprig
+  version: 6b2a58267f6a8b1dc8e2eb5519b984008fa85e8c
 - name: github.com/mholt/caddy
-  version: d3f338ddab9ee24b376b5c9c51e202581e2d43ba
+  version: 1f7b5abc80679fb71ee0e04ed98cbe284b1fc181
   subpackages:
   - caddy/caddymain
   - caddyfile
@@ -111,7 +118,7 @@ imports:
   - caddytls
   - onevent
   - onevent/hook
-  - startupshutdown
+  - telemetry
 - name: github.com/miekg/dns
   version: 0f3adef2e2201d72e50309a36fc99d8a9d1a4960
   repo: https://github.com/miekg/dns
@@ -133,18 +140,21 @@ imports:
   subpackages:
   - upstart
 - name: github.com/xenolf/lego
-  version: 4dde48a9b9916926a8dd4f69639c8dba40930355
+  version: fad2257e11ae4ff31ed03739386873aa405dec2d
   repo: https://github.com/xenolf/lego
   subpackages:
-  - acme
+  - acmev2
 - name: golang.org/x/crypto
-  version: 2faea1465de239e4babd8f5905cc25b781712442
+  version: 94eea52f7b742c7cbe0b03b22f0c4c8631ece122
   repo: https://go.googlesource.com/crypto
   subpackages:
-  - acme
   - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
   - hkdf
   - ocsp
+  - pbkdf2
+  - scrypt
   - ssh/terminal
 - name: golang.org/x/net
   version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
@@ -182,9 +192,9 @@ imports:
 - name: gopkg.in/natefinch/lumberjack.v2
   version: df99d62fd42d8b3752c8a42c6723555372c02a03
   repo: https://gopkg.in/natefinch/lumberjack.v2
-- name: gopkg.in/square/go-jose.v1
-  version: aa2e30fdd1fe9dd3394119af66451ae790d50e0d
-  repo: https://gopkg.in/square/go-jose.v1
+- name: gopkg.in/square/go-jose.v2
+  version: 6ee92191fea850cdcab9a18867abf5f521cdbadb
+  repo: https://gopkg.in/square/go-jose.v2
   subpackages:
   - cipher
   - json

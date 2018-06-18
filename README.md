@@ -26,6 +26,7 @@ supervisor {
   redirect_stderr file
   restart_policy policy
   termination_grace_period period
+  replicas replicas
 }
 ```
 
@@ -47,16 +48,17 @@ name {
   redirect_stderr file
   restart_policy policy
   termination_grace_period period
+  replicas replicas
 }
 ...
 ```
 
 ## Options description
 
-- **command**: the command or executable name to be executed
-- **args**: args provided to the command, separated by whitespace
-- **dir**: the working directory the command should be executed in
-- **env**: declare environment variable that should be passed to command. This property can be repeated
+- **command**: the command or executable name to be executed. Supports template.
+- **args**: args provided to the command, separated by whitespace. Supports template.
+- **dir**: the working directory the command should be executed in. Supports template.
+- **env**: declare environment variable that should be passed to command. This property can be repeated. Supports template.
 - **redirect_stdout**: redirect command stdout to a file. Use "stdout" to redirect to caddy stdout
 - **redirect_stderr**: redirect command stderr to a file. Use "stderr" to redirect to caddy stderr
 - **restart_policy**: define under which conditions the command should be restarted after exit. Valid values:
@@ -64,8 +66,25 @@ name {
   - **on_failure**: restart if exit code is not 0
   - **always**: always restart
 - **termination_grace_period**: amount of time to wait for application graceful termination before killing it. Ex: 10s
+- **replicas**: number of instances that should be executed. Default: 1.
 
 On windows **termination_grace_period** is ignored and the command is killed immediatelly due to lack of signals support.
+
+## Templates
+To enable different configuration per replica, you can use go templates on the fields marked with Supports template".
+
+The following information are available to templates:
+- **Replica**: the index of the current replica, starting from 0
+
+Templates also supports all functions from http://masterminds.github.io/sprig/
+
+Example:
+```
+supervisor myapp --port "{{add 8000 .Replica}}" {
+  replicas 5
+}
+proxy / localhost:8000-8004
+```
 
 ## Exponential backoff
 To avoid spending too many resources on a crashing application, this plugin makes use of exponential backoff.

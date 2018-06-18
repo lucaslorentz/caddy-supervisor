@@ -7,9 +7,6 @@ glide install
 go vet $(glide novendor)
 go test -race -v $(glide novendor)
 
-sed -i '491i\\t"supervisor",    // github.com/lucaslorentz/caddy-supervisor' \
- vendor/github.com/mholt/caddy/caddyhttp/httpserver/plugin.go
-
 CGO_ENABLED=0 go build -o caddy
 
 echo ""
@@ -20,7 +17,7 @@ echo ==Starting caddy with servertype==
 CADDY_PID=$!
 sleep 5
 kill $CADDY_PID
-wait $CADDY_PID
+wait $CADDY_PID || true
 echo ==Killed caddy with servertype==
 
 sleep 5
@@ -33,7 +30,9 @@ echo ==Starting caddy with httpplugin==
 CADDY_PID=$!
 sleep 5
 kill $CADDY_PID
-wait $CADDY_PID
+wait $CADDY_PID || true
 echo ==Killed caddy with httpplugin==
 
 sleep 5
+
+echo "Success!"

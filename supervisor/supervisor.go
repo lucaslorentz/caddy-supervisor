@@ -20,11 +20,25 @@ type Supervisor struct {
 	keepRunning bool
 }
 
-// CreateSupervisor creates a new process supervisor
-func CreateSupervisor(options *Options) *Supervisor {
-	return &Supervisor{
-		options: options,
+// CreateSupervisors creates a new process supervisor
+func CreateSupervisors(options *Options) []*Supervisor {
+	var supervisors []*Supervisor
+
+	for i := 0; i < options.Replicas; i++ {
+		templateData := &TemplateData{
+			Replica: i,
+		}
+
+		replicaOptions := options.processTemplates(templateData)
+
+		supervisor := &Supervisor{
+			options: replicaOptions,
+		}
+
+		supervisors = append(supervisors, supervisor)
 	}
+
+	return supervisors
 }
 
 // Start a process and supervise

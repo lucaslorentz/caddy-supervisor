@@ -14,6 +14,7 @@ type Options struct {
 	Command                string
 	Args                   []string
 	Dir                    string
+	RunDir                 string
 	Env                    []string
 	RedirectStdout         string
 	RedirectStderr         string
@@ -51,6 +52,7 @@ func (options *Options) processTemplates(data *TemplateData) *Options {
 	}
 
 	result.Dir = processTemplates(options.Dir, data)
+	result.RunDir = processTemplates(options.RunDir, data)
 
 	result.Env = make([]string, len(options.Env))
 	for i, env := range options.Env {

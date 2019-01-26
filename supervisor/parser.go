@@ -31,6 +31,14 @@ func ParseOption(c *caddy.Controller, options *Options) {
 			log.Printf("Option 'dir' expects 1 argument\n")
 		}
 		break
+	case "rundir":
+		args := c.RemainingArgs()
+		if len(args) == 1 {
+			options.RunDir = args[0]
+		} else {
+			log.Printf("Option 'rundir' expects 1 argument\n")
+		}
+		break
 	case "redirect_stdout":
 		if c.NextArg() {
 			options.RedirectStdout = c.Val()

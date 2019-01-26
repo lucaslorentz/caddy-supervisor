@@ -1,8 +1,8 @@
-hash: 1f8aba5642f9a1fbde3188900586a57ba654f63dd5ca3e04961726fcac7b0714
-updated: 2018-05-27T23:32:59.1440126+02:00
+hash: aeb8efccd14dc03a5fd5fe1a1c026e14def5da2f6540ce6282b3b0415557069b
+updated: 2019-01-26T15:06:04.8267296+01:00
 imports:
 - name: github.com/aead/chacha20
-  version: 8d6ce0550041f9d97e7f15ec27ed489f8bbbb0fb
+  version: 8b13a72661dae6e9e5dea04f344f0dc95ea29547
   repo: https://github.com/aead/chacha20
   subpackages:
   - chacha
@@ -10,7 +10,6 @@ imports:
   version: 3391d3790d23d03408670993e957e8f408993c34
 - name: github.com/bifurcation/mint
   version: 64af8ab8ccb81bd5d4eab356f79ba0939117d9f6
-  repo: https://github.com/bifurcation/mint
   subpackages:
   - syntax
 - name: github.com/cheekybits/genny
@@ -38,7 +37,6 @@ imports:
   repo: https://github.com/hashicorp/go-syslog
 - name: github.com/hashicorp/golang-lru
   version: 0a025b7e63adc15a622f29b0b2c4c3848243bbf6
-  repo: https://github.com/hashicorp/golang-lru
   subpackages:
   - simplelru
 - name: github.com/huandu/xstrings
@@ -57,9 +55,8 @@ imports:
   repo: https://github.com/klauspost/cpuid
 - name: github.com/lucas-clemente/aes12
   version: cd47fb39b79f867c6e4e5cd39cf7abd799f71670
-  repo: https://github.com/lucas-clemente/aes12
 - name: github.com/lucas-clemente/quic-go
-  version: da7708e47066ab0aff0f20f66b21c1f329db1eff
+  version: ""
   repo: https://github.com/lucas-clemente/quic-go
   subpackages:
   - h2quic
@@ -74,13 +71,12 @@ imports:
   - qerr
 - name: github.com/lucas-clemente/quic-go-certificates
   version: d2f86524cced5186554df90d92529757d22c1cb6
-  repo: https://github.com/lucas-clemente/quic-go-certificates
 - name: github.com/Masterminds/semver
   version: 59c29afe1a994eacb71c833025ca7acf874bb1da
 - name: github.com/Masterminds/sprig
-  version: 6b2a58267f6a8b1dc8e2eb5519b984008fa85e8c
+  version: 9d9aa1f74c86fd9d36ecfe3f2a44a3093c3d4c15
 - name: github.com/mholt/caddy
-  version: 1f7b5abc80679fb71ee0e04ed98cbe284b1fc181
+  version: 8ab447e6159ce2c47ccc853cf20ac2b5515c54e9
   subpackages:
   - caddy/caddymain
   - caddyfile
@@ -119,6 +115,9 @@ imports:
   - onevent
   - onevent/hook
   - telemetry
+- name: github.com/mholt/certmagic
+  version: a3b276a1b44e1c2c3dcab752729976ea04f4839b
+  repo: https://github.com/mholt/certmagic
 - name: github.com/miekg/dns
   version: 0f3adef2e2201d72e50309a36fc99d8a9d1a4960
   repo: https://github.com/miekg/dns
@@ -132,18 +131,62 @@ imports:
   - ast
 - name: github.com/NetWatcher/service
   version: 12236803cddffddf8ba667dad93bbfaf3d6720dc
+- name: github.com/otiai10/copy
+  version: 7e9a647135a142c2669943d4a4d29be015ce9392
 - name: github.com/russross/blackfriday
   version: 067529f716f4c3f5e37c8c95ddd59df1007290ae
   repo: https://github.com/russross/blackfriday
+- name: github.com/satori/go.uuid
+  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/vektra/tachyon
   version: 0da4f3861aef5471cfd69a2d265584fafe70230f
   subpackages:
   - upstart
 - name: github.com/xenolf/lego
-  version: fad2257e11ae4ff31ed03739386873aa405dec2d
+  version: b05b54d1f69a31ceed92e2995243c5b17821c9e4
   repo: https://github.com/xenolf/lego
   subpackages:
-  - acmev2
+  - acme
+  - acme/api
+  - acme/api/internal/nonces
+  - acme/api/internal/secure
+  - acme/api/internal/sender
+  - certcrypto
+  - certificate
+  - challenge
+  - challenge/dns01
+  - challenge/http01
+  - challenge/resolver
+  - challenge/tlsalpn01
+  - lego
+  - log
+  - platform/wait
+  - registration
+  - vendor/github.com/miekg/dns
+  - vendor/golang.org/x/crypto/ed25519
+  - vendor/golang.org/x/crypto/ocsp
+  - vendor/golang.org/x/crypto/pbkdf2
+  - vendor/golang.org/x/net/bpf
+  - vendor/golang.org/x/net/idna
+  - vendor/golang.org/x/net/internal/iana
+  - vendor/golang.org/x/net/internal/socket
+  - vendor/golang.org/x/net/ipv4
+  - vendor/golang.org/x/net/ipv6
+  - vendor/golang.org/x/sys/unix
+  - vendor/golang.org/x/text/collate
+  - vendor/golang.org/x/text/internal/colltab
+  - vendor/golang.org/x/text/internal/gen
+  - vendor/golang.org/x/text/internal/tag
+  - vendor/golang.org/x/text/internal/triegen
+  - vendor/golang.org/x/text/internal/ucd
+  - vendor/golang.org/x/text/language
+  - vendor/golang.org/x/text/secure/bidirule
+  - vendor/golang.org/x/text/transform
+  - vendor/golang.org/x/text/unicode/bidi
+  - vendor/golang.org/x/text/unicode/cldr
+  - vendor/golang.org/x/text/unicode/norm
+  - vendor/golang.org/x/text/unicode/rangetable
+  - vendor/gopkg.in/square/go-jose.v2
 - name: golang.org/x/crypto
   version: 94eea52f7b742c7cbe0b03b22f0c4c8631ece122
   repo: https://go.googlesource.com/crypto
@@ -161,15 +204,17 @@ imports:
   repo: https://go.googlesource.com/net
   subpackages:
   - context
+  - http/httpguts
   - http2
   - http2/hpack
   - idna
   - lex/httplex
   - publicsuffix
 - name: golang.org/x/sys
-  version: 35ef4487ce0a1ea5d4b616ffe71e34febe723695
+  version: 49385e6e15226593f68b26af201feec29d5bba22
   repo: https://go.googlesource.com/sys
   subpackages:
+  - cpu
   - unix
   - windows
   - windows/registry

@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/otiai10/copy"
 )
 
 const (
@@ -43,6 +45,10 @@ func CreateSupervisors(options *Options) []*Supervisor {
 
 // Start a process and supervise
 func (s *Supervisor) Start() {
+	if s.options.RunDir != "" && s.options.Dir != "" {
+		copy.Copy(s.options.Dir, s.options.RunDir)
+	}
+
 	s.keepRunning = true
 	go s.supervise()
 }
@@ -55,7 +61,9 @@ func (s *Supervisor) supervise() {
 
 		s.cmd.Env = append(os.Environ(), s.options.Env...)
 
-		if s.options.Dir != "" {
+		if s.options.RunDir != "" {
+			s.cmd.Dir = s.options.RunDir
+		} else if s.options.Dir != "" {
 			s.cmd.Dir = s.options.Dir
 		}
 
@@ -128,6 +136,18 @@ func (s *Supervisor) Stop() {
 		} else {
 			s.cmd.Process.Kill()
 		}
+	}
+
+	if s.options.RunDir != "" && s.options.Dir != "" {
+		removeAllWithRetry(s.options.RunDir, 0)
+	}
+}
+
+func removeAllWithRetry(path string, retries int) {
+	err := os.RemoveAll(path)
+	if err != nil && retries < 3 {
+		time.Sleep(500 * time.Millisecond)
+		removeAllWithRetry(path, retries+1)
 	}
 }
 

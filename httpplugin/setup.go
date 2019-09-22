@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/lucaslorentz/caddy-supervisor/supervisor"
-	"github.com/mholt/caddy"
+	"github.com/caddyserver/caddy"
 )
 
 func init() {

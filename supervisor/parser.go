@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mholt/caddy"
+	"github.com/caddyserver/caddy"
 )
 
 // ParseOption parses supervisor options

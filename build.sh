@@ -2,10 +2,8 @@
 
 set -e
 
-glide install
-
-go vet $(glide novendor)
-go test -race -v $(glide novendor)
+go vet $(go list ./... | grep -v vendor)
+go test -race -v $(go list ./... | grep -v vendor)
 
 CGO_ENABLED=0 go build -o caddy
 

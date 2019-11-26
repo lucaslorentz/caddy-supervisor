@@ -10,8 +10,8 @@ import (
 var emptyFunc = func() {}
 
 const (
+	minRestartDelay             = time.Duration(0)
 	maxRestartDelay             = 5 * time.Minute
-	minRestartDelay             = 10 * time.Second
 	durationToResetRestartDelay = 10 * time.Minute
 )
 
@@ -160,6 +160,10 @@ func getOutputFile(value string) (*os.File, func(), error) {
 }
 
 func increaseRestartDelay(restartDelay time.Duration) time.Duration {
+	if restartDelay == 0 {
+		return 1 * time.Second
+	}
+
 	restartDelay = restartDelay * 2
 
 	if restartDelay > maxRestartDelay {

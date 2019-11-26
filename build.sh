@@ -2,10 +2,8 @@
 
 set -e
 
-glide install
-
-go vet $(glide novendor)
-go test -race -v $(glide novendor)
+go get -v
+go test -race -v
 
 CGO_ENABLED=0 go build -o caddy
 

@@ -1,8 +1,6 @@
 package httpplugin
 
 import (
-	"sync"
-
 	"github.com/caddyserver/caddy"
 	"github.com/lucaslorentz/caddy-supervisor/supervisor"
 )
@@ -10,15 +8,11 @@ import (
 func init() {
 	caddy.RegisterPlugin("supervisor", caddy.Plugin{
 		ServerType: "http",
-		Action:     setup,
+		Action:     setupDirective,
 	})
 }
 
-var supervisors []*supervisor.Supervisor
-
-func setup(c *caddy.Controller) error {
-	setupEventsOnlyOnce(c)
-
+func setupDirective(c *caddy.Controller) error {
 	return c.OncePerServerBlock(func() error {
 		optionsList, err := parseHTTPDirectives(c)
 		if err != nil {
@@ -26,38 +20,25 @@ func setup(c *caddy.Controller) error {
 		}
 
 		for _, options := range optionsList {
-			newSupervisors := supervisor.CreateSupervisors(options)
-			supervisors = append(supervisors, newSupervisors...)
-			for _, supervisor := range newSupervisors {
-				go supervisor.Start()
+			supervisors := supervisor.CreateSupervisors(options)
+			for _, sup := range supervisors {
+				func(s *supervisor.Supervisor) {
+					c.OnStartup(func() error {
+						go s.Run()
+						return nil
+					})
+					// Use OnRestart to shutdown supervisors before new instances starts
+					c.OnRestart(func() error {
+						s.Stop()
+						return nil
+					})
+					c.OnFinalShutdown(func() error {
+						s.Stop()
+						return nil
+					})
+				}(sup)
 			}
 		}
 		return nil
 	})
-}
-
-var didSetupEvents = false
-
-func setupEventsOnlyOnce(c *caddy.Controller) {
-	if didSetupEvents {
-		return
-	}
-	c.OnShutdown(shutdownExecutions)
-	didSetupEvents = true
-}
-
-func shutdownExecutions() error {
-	var wg sync.WaitGroup
-
-	for _, s := range supervisors {
-		wg.Add(1)
-		go func(s *supervisor.Supervisor) {
-			defer wg.Done()
-			s.Stop()
-		}(s)
-	}
-
-	wg.Wait()
-
-	return nil
 }

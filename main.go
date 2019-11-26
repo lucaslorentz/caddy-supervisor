@@ -2,7 +2,7 @@ package main
 
 import (
 	// Caddy
-	"github.com/mholt/caddy/caddy/caddymain"
+	"github.com/caddyserver/caddy/caddy/caddymain"
 
 	// Plugins
 	_ "github.com/hacdias/caddy-service"

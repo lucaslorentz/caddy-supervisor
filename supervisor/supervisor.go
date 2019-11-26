@@ -7,9 +7,11 @@ import (
 	"time"
 )
 
+var emptyFunc = func() {}
+
 const (
+	minRestartDelay             = time.Duration(0)
 	maxRestartDelay             = 5 * time.Minute
-	minRestartDelay             = 10 * time.Second
 	durationToResetRestartDelay = 10 * time.Minute
 )
 
@@ -41,13 +43,10 @@ func CreateSupervisors(options *Options) []*Supervisor {
 	return supervisors
 }
 
-// Start a process and supervise
-func (s *Supervisor) Start() {
+// Run a process and supervise
+func (s *Supervisor) Run() {
 	s.keepRunning = true
-	go s.supervise()
-}
 
-func (s *Supervisor) supervise() {
 	restartDelay := minRestartDelay
 
 	for s.keepRunning {
@@ -59,14 +58,18 @@ func (s *Supervisor) supervise() {
 			s.cmd.Dir = s.options.Dir
 		}
 
-		if stdoutFile := getFile(s.options.RedirectStdout); stdoutFile != nil {
+		if stdoutFile, closeStdout, err := getOutputFile(s.options.RedirectStdout); err == nil {
 			s.cmd.Stdout = stdoutFile
-			defer stdoutFile.Close()
+			closeStdout()
+		} else {
+			log.Printf("RedirectStdout error: %v\n", err)
 		}
 
-		if stderrFile := getFile(s.options.RedirectStderr); stderrFile != nil {
+		if stderrFile, closeStderr, err := getOutputFile(s.options.RedirectStderr); err == nil {
 			s.cmd.Stderr = stderrFile
-			defer stderrFile.Close()
+			closeStderr()
+		} else {
+			log.Printf("RedirectStderr error: %v\n", err)
 		}
 
 		start := time.Now()
@@ -135,26 +138,32 @@ func cmdIsRunning(cmd *exec.Cmd) bool {
 	return cmd != nil && cmd.Process != nil && (cmd.ProcessState == nil || !cmd.ProcessState.Exited())
 }
 
-func getFile(value string) *os.File {
+func getOutputFile(value string) (*os.File, func(), error) {
 	if value == "" {
-		return nil
+		return nil, emptyFunc, nil
 	}
 
 	switch value {
 	case "stdout":
-		return os.Stdout
+		return os.Stdout, emptyFunc, nil
 	case "stderr":
-		return os.Stderr
+		return os.Stderr, emptyFunc, nil
 	default:
 		outFile, err := os.OpenFile(value, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 		if err != nil {
-			return nil
+			return nil, nil, err
 		}
-		return outFile
+		return outFile, func() {
+			outFile.Close()
+		}, nil
 	}
 }
 
 func increaseRestartDelay(restartDelay time.Duration) time.Duration {
+	if restartDelay == 0 {
+		return 1 * time.Second
+	}
+
 	restartDelay = restartDelay * 2
 
 	if restartDelay > maxRestartDelay {

@@ -10,5 +10,5 @@ echo {
     args "Hello World {{.Replica}}"
     redirect_stdout stdout
     restart_policy on_failure
-    replicas 5
+    replicas 3
 }

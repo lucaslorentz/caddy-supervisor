@@ -1,6 +1,7 @@
 package servertype
 
 import (
+	"net"
 	"strings"
 	"sync"
 
@@ -32,21 +33,30 @@ func init() {
 	for _, directive := range directives {
 		caddy.RegisterPlugin(directive, caddy.Plugin{
 			ServerType: "supervisor",
-			Action:     setup,
+			Action:     setupDirective,
 		})
 	}
 }
 
 func newContext(inst *caddy.Instance) caddy.Context {
-	return &supervisorContext{
-		instance: inst,
-		options:  make(map[string]*supervisor.Options),
+	context := &supervisorContext{
+		instance:    inst,
+		options:     make(map[string]*supervisor.Options),
+		supervisors: []*supervisor.Supervisor{},
 	}
+
+	inst.OnShutdown = append(inst.OnShutdown, func() error {
+		shutdownSupervisors(context.supervisors)
+		return nil
+	})
+
+	return context
 }
 
 type supervisorContext struct {
-	instance *caddy.Instance
-	options  map[string]*supervisor.Options
+	instance    *caddy.Instance
+	options     map[string]*supervisor.Options
+	supervisors []*supervisor.Supervisor
 }
 
 func (n *supervisorContext) InspectServerBlocks(sourceFile string, serverBlocks []caddyfile.ServerBlock) ([]caddyfile.ServerBlock, error) {
@@ -63,22 +73,40 @@ var supervisors []*supervisor.Supervisor
 
 // MakeServers uses the newly-created configs to create and return a list of server instances.
 func (n *supervisorContext) MakeServers() ([]caddy.Server, error) {
+	servers := []caddy.Server{}
 	for _, options := range n.options {
 		newSupervisors := supervisor.CreateSupervisors(options)
 		supervisors = append(supervisors, newSupervisors...)
 		for _, supervisor := range newSupervisors {
-			go supervisor.Start()
+			n.supervisors = append(n.supervisors, supervisor)
+			servers = append(servers, &supervisorServer{supervisor: supervisor})
 		}
 	}
-	return nil, nil
+	return servers, nil
 }
 
-func setup(c *caddy.Controller) error {
+type supervisorServer struct {
+	supervisor *supervisor.Supervisor
+}
+
+func (server *supervisorServer) Listen() (net.Listener, error) {
+	return nil, nil
+}
+func (server *supervisorServer) Serve(net.Listener) error {
+	server.supervisor.Run()
+	return nil
+}
+func (server *supervisorServer) ListenPacket() (net.PacketConn, error) {
+	return nil, nil
+}
+func (server *supervisorServer) ServePacket(net.PacketConn) error {
+	return nil
+}
+
+func setupDirective(c *caddy.Controller) error {
 	key := mergeKeys(c.ServerBlockKeys)
 
 	ctx := c.Context().(*supervisorContext)
-
-	setupEventsOnlyOnce(c)
 
 	return c.OncePerServerBlock(func() error {
 		options := ctx.options[key]
@@ -93,17 +121,7 @@ func mergeKeys(keys []string) string {
 	return strings.Join(keys, " ")
 }
 
-var didSetupEvents = false
-
-func setupEventsOnlyOnce(c *caddy.Controller) {
-	if didSetupEvents {
-		return
-	}
-	c.OnShutdown(shutdownSupervisors)
-	didSetupEvents = true
-}
-
-func shutdownSupervisors() error {
+func shutdownSupervisors(supervisors []*supervisor.Supervisor) error {
 	var wg sync.WaitGroup
 
 	for _, s := range supervisors {

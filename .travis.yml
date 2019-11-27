@@ -12,3 +12,4 @@ install:
  - go get -v
 script:
   - ./build.sh
+  - go test ./...

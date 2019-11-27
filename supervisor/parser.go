@@ -3,13 +3,14 @@ package supervisor
 import (
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/caddyserver/caddy"
 )
 
 // ParseOption parses supervisor options
-func ParseOption(c *caddy.Controller, options *Options) {
+func ParseOption(c *caddy.Controller, options *Options) bool {
 	v := c.Val()
 	switch v {
 	case "command":
@@ -18,6 +19,7 @@ func ParseOption(c *caddy.Controller, options *Options) {
 			options.Command = args[0]
 		} else {
 			log.Printf("Option 'command' expects 1 argument\n")
+			return false
 		}
 		break
 	case "args":
@@ -29,6 +31,7 @@ func ParseOption(c *caddy.Controller, options *Options) {
 			options.Dir = args[0]
 		} else {
 			log.Printf("Option 'dir' expects 1 argument\n")
+			return false
 		}
 		break
 	case "redirect_stdout":
@@ -61,10 +64,11 @@ func ParseOption(c *caddy.Controller, options *Options) {
 			default:
 				options.RestartPolicy = RestartNever
 				log.Printf("Invalid 'restart' option %v\n", options.RestartPolicy)
-				break
+				return false
 			}
 		} else {
 			log.Printf("Option 'restart' expects 1 argument\n")
+			return false
 		}
 	case "termination_grace_period":
 		args := c.RemainingArgs()
@@ -74,16 +78,19 @@ func ParseOption(c *caddy.Controller, options *Options) {
 				options.TerminationGracePeriod = period
 			} else {
 				log.Printf("Invalid 'termination_grace_period' value %v\n", args[0])
+				return false
 			}
 		} else {
 			log.Printf("Option 'termination_grace_period' expects 1 argument\n")
+			return false
 		}
 	case "env":
 		args := c.RemainingArgs()
-		if len(args) == 1 {
-			options.Env = append(options.Env, args[0])
+		if len(args) > 0 {
+			options.Env = append(options.Env, strings.Join(args, " "))
 		} else {
-			log.Printf("Option 'env' expects 1 argument in format KEY=VALUE\n")
+			log.Printf("Option 'env' expects at least 1 argument in format KEY=VALUE\n")
+			return false
 		}
 		break
 	case "replicas":
@@ -94,10 +101,14 @@ func ParseOption(c *caddy.Controller, options *Options) {
 				options.Replicas = replicas
 			} else {
 				log.Printf("Invalid 'replicas' value %v\n", args[0])
+				return false
 			}
 		} else {
 			log.Printf("Option 'replicas' expects 1 argument\n")
+			return false
 		}
 		break
 	}
+
+	return true
 }

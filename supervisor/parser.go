@@ -86,10 +86,12 @@ func ParseOption(c *caddy.Controller, options *Options) bool {
 		}
 	case "env":
 		args := c.RemainingArgs()
-		if len(args) > 0 {
-			options.Env = append(options.Env, strings.Join(args, " "))
+		if len(args) == 2 {
+			options.Env = append(options.Env, args[0]+"="+args[1])
+		} else if len(args) == 1 && strings.Contains(args[0], "=") {
+			options.Env = append(options.Env, args[0])
 		} else {
-			log.Printf("Option 'env' expects at least 1 argument in format KEY=VALUE\n")
+			log.Printf("Option 'env' expects 2 argument in format KEY VALUE or 1 argument in format KEY=VALUE\n")
 			return false
 		}
 		break

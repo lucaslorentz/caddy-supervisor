@@ -6,7 +6,7 @@ localhost {
 
     supervisor sh -c "echo Hello World {{.Replica}} Number = $NUMBER" {
         redirect_stdout stdout
-        env NUMBER={{ add 0 .Replica }}
+        env NUMBER "{{ add 0 .Replica }}"
         restart_policy on_failure
         replicas 3
     }

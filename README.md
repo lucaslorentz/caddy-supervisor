@@ -20,8 +20,8 @@ supervisor {
   command command
   args arg1 arg2 arg3
   dir directory
-  env VARIABLEA=VALUEA
-  env VARIABLEB=VALUEB
+  env VARIABLEA VALUEA
+  env VARIABLEB VALUEB
   redirect_stdout file
   redirect_stderr file
   restart_policy policy
@@ -42,8 +42,8 @@ name {
   command command
   args arg1 arg2 arg3
   dir directory
-  env VARIABLEA=VALUEA
-  env VARIABLEB=VALUEB
+  env VARIABLEA VALUEA
+  env VARIABLEB VALUEB
   redirect_stdout file
   redirect_stderr file
   restart_policy policy

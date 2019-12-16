@@ -89,17 +89,16 @@ proxy / localhost:8000-8004
 ## Exponential backoff
 To avoid spending too many resources on a crashing application, this plugin makes use of exponential backoff.
 
-That means that when the command exits, it will be restarted with a delay of 10 seconds.
-On every successive exit, the delay time doubles, with a max limit of 5 minutes.
+That means that when the command fail, it will be restarted with a delay of 0 seconds. If it fails again it will be restarted with a delay of 1 seconds, then on every sucessive failure the delay time doubles, with a max limit of 5 minutes.
 
-If the command runs stable for at least 10 minutes, the restart delay is reset to 10 seconds.
+If the command runs stable for at least 10 minutes, the restart delay is reset to 0 seconds.
 
 ## Examples
 AspNet Core application on windows:
 ```
 example.com {
   run {
-    env ASPNETCORE_URLS=http://localhost:5000
+    env ASPNETCORE_URLS http://localhost:5000
     command dotnet ./MyApplication.dll
     dir "C:\MyApplicationFolder"
     redirect_stdout stdout

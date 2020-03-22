@@ -1,6 +1,7 @@
 localhost {
     supervisor ping google.com {
-        redirect_stdout stdout
+        redirect_stdout ping.log
+        redirect_stderr ping.log
         restart_policy always
     }
 

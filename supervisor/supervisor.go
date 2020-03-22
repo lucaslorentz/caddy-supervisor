@@ -58,16 +58,18 @@ func (s *Supervisor) Run() {
 			s.cmd.Dir = s.options.Dir
 		}
 
-		if stdoutFile, closeStdout, err := getOutputFile(s.options.RedirectStdout); err == nil {
-			s.cmd.Stdout = stdoutFile
-			closeStdout()
+		var afterRun []func()
+
+		if outputFile, closeFile, err := getOutputFile(s.options.RedirectStdout); err == nil {
+			s.cmd.Stdout = outputFile
+			afterRun = append(afterRun, closeFile)
 		} else {
 			log.Printf("RedirectStdout error: %v\n", err)
 		}
 
-		if stderrFile, closeStderr, err := getOutputFile(s.options.RedirectStderr); err == nil {
-			s.cmd.Stderr = stderrFile
-			closeStderr()
+		if outputFile, closeFile, err := getOutputFile(s.options.RedirectStderr); err == nil {
+			s.cmd.Stderr = outputFile
+			afterRun = append(afterRun, closeFile)
 		} else {
 			log.Printf("RedirectStderr error: %v\n", err)
 		}
@@ -75,6 +77,10 @@ func (s *Supervisor) Run() {
 		start := time.Now()
 		err := s.cmd.Run()
 		duration := time.Now().Sub(start)
+
+		for _, fn := range afterRun {
+			fn()
+		}
 
 		if err != nil {
 			log.Printf("Process error: %v\n", err)

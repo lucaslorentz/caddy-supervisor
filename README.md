@@ -8,55 +8,18 @@ For every **supervisor** caddy directive a command is executed in background and
 
 You can use **supervisor** plugin as an http directive or as a server type.
 
-## Supervisor http directive
-You can activate a supervisor directly from your web caddyfile using:
-```
-supervisor command arg1 arg2 arg3
-```
+## WIP for caddy-v2 module
+ TODO :
 
-Or using a block for more control
-```
-supervisor {
-  command command
-  args arg1 arg2 arg3
-  dir directory
-  env VARIABLEA VALUEA
-  env VARIABLEB VALUEB
-  redirect_stdout file
-  redirect_stderr file
-  restart_policy policy
-  termination_grace_period period
-  replicas replicas
-}
-```
-
-## Supervisor server type
-You can also use a supervisor server type using `-type` CLI option:
-```
-caddy -type supervisor
-```
-
-The Caddyfile syntax for supervisor server type is:
-```
-name {
-  command command
-  args arg1 arg2 arg3
-  dir directory
-  env VARIABLEA VALUEA
-  env VARIABLEB VALUEB
-  redirect_stdout file
-  redirect_stderr file
-  restart_policy policy
-  termination_grace_period period
-  replicas replicas
-}
-...
-```
+- [x] Supervisor module
+- [ ] Caddyfile support
+- [ ] Tests
+- [ ] Updated README
+- [ ] CI / Github Actions
 
 ## Options description
 
-- **command**: the command or executable name to be executed. Supports template.
-- **args**: args provided to the command, separated by whitespace. Supports template.
+- **command**: the command to be executed. Supports template.
 - **dir**: the working directory the command should be executed in. Supports template.
 - **env**: declare environment variable that should be passed to command. This property can be repeated. Supports template.
 - **redirect_stdout**: redirect command stdout to a file. Use "stdout" to redirect to caddy stdout

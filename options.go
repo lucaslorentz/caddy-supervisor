@@ -2,6 +2,9 @@ package supervisor
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"strings"
 	"text/template"
 	"time"
 
@@ -10,8 +13,8 @@ import (
 
 // Options exposes settings to create a process supervisor
 type Options struct {
-	Replicas               int
 	Command                string
+	Replica                int
 	Args                   []string
 	Dir                    string
 	Env                    []string
@@ -19,14 +22,6 @@ type Options struct {
 	RedirectStderr         string
 	RestartPolicy          RestartPolicy
 	TerminationGracePeriod time.Duration
-}
-
-// CreateOptions createnew SupervisorOptions with default settings
-func CreateOptions() *Options {
-	return &Options{
-		Replicas:               1,
-		TerminationGracePeriod: 10 * time.Second,
-	}
 }
 
 // RestartPolicy determines when a supervised process should be restarted
@@ -41,20 +36,33 @@ const (
 	RestartAlways = RestartPolicy("always")
 )
 
-func (options *Options) processTemplates(data *TemplateData) *Options {
+func (options Options) processTemplates() (Options, error) {
 	result := Options{}
-	result.Command = processTemplates(options.Command, data)
+	var err error
+	var tplErrors []string
+
+	handleError := func (option string, e error) {
+		if e != nil {
+			tplErrors = append(tplErrors, fmt.Sprintf("%s: %s", option, e))
+		}
+	}
+
+	result.Command, err = processTemplates(options.Command, options)
+	handleError("command", err)
 
 	result.Args = make([]string, len(options.Args))
 	for i, arg := range options.Args {
-		result.Args[i] = processTemplates(arg, data)
+		result.Args[i], err = processTemplates(arg, options)
+		handleError(fmt.Sprintf("args[%d]", i), err)
 	}
 
-	result.Dir = processTemplates(options.Dir, data)
+	result.Dir, err = processTemplates(options.Dir, options)
+	handleError("dir", err)
 
 	result.Env = make([]string, len(options.Env))
 	for i, env := range options.Env {
-		result.Env[i] = processTemplates(env, data)
+		result.Env[i], err = processTemplates(env, options)
+		handleError(fmt.Sprintf("env[%d]", i), err)
 	}
 
 	result.RedirectStdout = options.RedirectStdout
@@ -62,24 +70,25 @@ func (options *Options) processTemplates(data *TemplateData) *Options {
 	result.RestartPolicy = options.RestartPolicy
 	result.TerminationGracePeriod = options.TerminationGracePeriod
 
-	return &result
+	if len(tplErrors) > 0 {
+		return result, errors.New("failed to process templates: \n" + strings.Join(tplErrors, "\n"))
+	}
+
+	return result, nil
 }
 
-// TemplateData contains data to be accessed from templates
-type TemplateData struct {
-	Replica int
-}
-
-func processTemplates(text string, data interface{}) string {
-	tmpl, err := template.New("test").Funcs(sprig.TxtFuncMap()).Parse(text)
+func processTemplates(text string, data interface{}) (string, error) {
+	tmpl, err := template.New("supervisor").Funcs(sprig.TxtFuncMap()).Parse(text)
 	if err != nil {
-		return err.Error()
+		return "", err
 	}
 
 	var writer bytes.Buffer
 	err = tmpl.Execute(&writer, data)
+
 	if err != nil {
-		return err.Error()
+		return "", err
 	}
-	return writer.String()
+
+	return writer.String(), nil
 }

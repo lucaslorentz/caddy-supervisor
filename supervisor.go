@@ -1,9 +1,10 @@
 package supervisor
 
 import (
-	"log"
+	"go.uber.org/zap"
 	"os"
 	"os/exec"
+	"syscall"
 	"time"
 )
 
@@ -17,30 +18,10 @@ const (
 
 // Supervisor provides functionality to start and supervise a background process
 type Supervisor struct {
-	options     *Options
+	Options     Options
 	cmd         *exec.Cmd
 	keepRunning bool
-}
-
-// CreateSupervisors creates a new process supervisor
-func CreateSupervisors(options *Options) []*Supervisor {
-	var supervisors []*Supervisor
-
-	for i := 0; i < options.Replicas; i++ {
-		templateData := &TemplateData{
-			Replica: i,
-		}
-
-		replicaOptions := options.processTemplates(templateData)
-
-		supervisor := &Supervisor{
-			options: replicaOptions,
-		}
-
-		supervisors = append(supervisors, supervisor)
-	}
-
-	return supervisors
+	logger      *zap.Logger
 }
 
 // Run a process and supervise
@@ -50,29 +31,34 @@ func (s *Supervisor) Run() {
 	restartDelay := minRestartDelay
 
 	for s.keepRunning {
-		s.cmd = exec.Command(s.options.Command, s.options.Args...)
+		s.cmd = exec.Command(s.Options.Command, s.Options.Args...)
+		s.cmd.SysProcAttr = &syscall.SysProcAttr{
+			Setpgid: true,
+			Pgid: 0,
+		}
+		s.cmd.Env = append(os.Environ(), s.Options.Env...)
 
-		s.cmd.Env = append(os.Environ(), s.options.Env...)
-
-		if s.options.Dir != "" {
-			s.cmd.Dir = s.options.Dir
+		if s.Options.Dir != "" {
+			s.cmd.Dir = s.Options.Dir
 		}
 
 		var afterRun []func()
 
-		if outputFile, closeFile, err := getOutputFile(s.options.RedirectStdout); err == nil {
+		if outputFile, closeFile, err := getOutputFile(s.Options.RedirectStdout); err == nil {
 			s.cmd.Stdout = outputFile
 			afterRun = append(afterRun, closeFile)
 		} else {
-			log.Printf("RedirectStdout error: %v\n", err)
+			s.logger.Error("cannot setup stdout redirection", zap.Error(err), zap.String("file", s.Options.RedirectStdout))
 		}
 
-		if outputFile, closeFile, err := getOutputFile(s.options.RedirectStderr); err == nil {
+		if outputFile, closeFile, err := getOutputFile(s.Options.RedirectStderr); err == nil {
 			s.cmd.Stderr = outputFile
 			afterRun = append(afterRun, closeFile)
 		} else {
-			log.Printf("RedirectStderr error: %v\n", err)
+			s.logger.Error("cannot setup stderr redirection", zap.Error(err), zap.String("file", s.Options.RedirectStderr))
 		}
+
+		s.logger.Info("starting process")
 
 		start := time.Now()
 		err := s.cmd.Run()
@@ -83,16 +69,16 @@ func (s *Supervisor) Run() {
 		}
 
 		if err != nil {
-			log.Printf("Process error: %v\n", err)
+			s.logger.Error("process exited with error", zap.Error(err), zap.Duration("duration", duration))
 		} else {
-			log.Printf("Process exited after: %v\n", duration)
+			s.logger.Info("process exited", zap.Duration("duration", duration))
 		}
 
 		if !s.keepRunning {
 			break
 		}
 
-		switch s.options.RestartPolicy {
+		switch s.Options.RestartPolicy {
 		case RestartAlways:
 			break
 		case RestartOnFailure:
@@ -107,12 +93,12 @@ func (s *Supervisor) Run() {
 
 		if s.keepRunning {
 			if restartDelay > minRestartDelay && (err == nil || duration > durationToResetRestartDelay) {
-				log.Printf("Resetting restart delay to %v\n", minRestartDelay)
+				s.logger.Info("resetting restart delay", zap.Duration("delay", minRestartDelay))
 				restartDelay = minRestartDelay
 			}
 
 			if err != nil {
-				log.Printf("Restarting in %v\n", restartDelay)
+				s.logger.Info("process will restart", zap.Duration("wait_delay", restartDelay))
 				time.Sleep(restartDelay)
 				restartDelay = increaseRestartDelay(restartDelay)
 			}
@@ -125,16 +111,27 @@ func (s *Supervisor) Stop() {
 	s.keepRunning = false
 
 	if cmdIsRunning(s.cmd) {
+		s.logger.Debug("sending 'interrupt signal to gracefully stop the process")
+
 		err := s.cmd.Process.Signal(os.Interrupt)
 		if err == nil {
 			go func() {
-				time.Sleep(s.options.TerminationGracePeriod)
+				time.Sleep(s.Options.TerminationGracePeriod)
 				if cmdIsRunning(s.cmd) {
+					s.logger.
+						With(zap.Duration("grace_period", s.Options.TerminationGracePeriod)).
+						Info("termination grace period exceeded, killing")
+
 					s.cmd.Process.Kill()
 				}
 			}()
-			s.cmd.Process.Wait()
+
+			s.cmd.Wait()
 		} else {
+			s.logger.
+				With(zap.Error(err)).
+				Info("error while sending 'interup' signal, killing")
+
 			s.cmd.Process.Kill()
 		}
 	}

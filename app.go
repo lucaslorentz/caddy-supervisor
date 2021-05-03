@@ -42,16 +42,10 @@ func (a *App) Provision(context caddy.Context) error {
 			return err
 		}
 
-		a.log.
-			With(zap.Any("supervisors", supervisors)).
-			With(zap.Any("definition", definition)).
-			Debug("Supervisors created")
-
-
 		a.supervisors = append(a.supervisors, supervisors...)
 	}
 
-	a.log.With(zap.Any("config", a.supervisors)).Debug("module provisioned")
+	a.log.Debug("module provisioned", zap.Any("supervisors", a.supervisors))
 
 	return nil
 }

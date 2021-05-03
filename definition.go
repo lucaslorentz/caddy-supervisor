@@ -9,15 +9,30 @@ import (
 
 // Definition is the configuration for process to supervise
 type Definition struct {
-	Command                []string `json:"command,omitempty"`
-	Replicas               int
-	KeepRunning            bool `json:"keep_running"`
-	Dir                    string
-	Env                    map[string]string
-	RedirectStdout         string        `json:"redirect_stdout"`
-	RedirectStderr         string        `json:"redirect_stderr"`
-	RestartPolicy          RestartPolicy `json:"restart_policy"`
-	TerminationGracePeriod string        `json:"termination_grace_period"`
+	// Command to start and supervise. First item is the program to start, others are arguments.
+	// Supports template.
+	Command []string `json:"command"`
+	// Replicas control how many instances of Command should run.
+	Replicas int `json:"replicas"`
+	// Dir defines the working directory the command should be executed in.
+	// Supports template.
+	// Default: current working dir
+	Dir string `json:"dir"`
+	// Env declares environment variables that should be passed to command.
+	// Supports template.
+	Env map[string]string `json:"env"`
+	// RedirectStdout is the file where Command stdout is written. Use "stdout" to redirect to caddy stdout.
+	RedirectStdout string `json:"redirect_stdout"`
+	// RedirectStderr is the file where Command stderr is written. Use "stderr" to redirect to caddy stderr.
+	RedirectStderr string `json:"redirect_stderr"`
+	// RestartPolicy define under which conditions the command should be restarted after exit.
+	// Valid values:
+	//  - **never**: do not restart the command
+	//  - **on_failure**: restart if exit code is not 0
+	//  - **always**: always restart
+	RestartPolicy RestartPolicy `json:"restart_policy"`
+	// TerminationGracePeriod defines the amount of time to wait for Command graceful termination before killing it. Ex: 10s
+	TerminationGracePeriod string `json:"termination_grace_period"`
 }
 
 // ToSupervisors creates supervisors from the Definition (one per replica) and applies templates where needed
@@ -27,13 +42,13 @@ func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 	cmd := strings.Join(d.Command, " ")
 
 	opts := &Options{
-		Command:                d.Command[0],
-		Args:                   d.Command[1:],
-		Dir:                    d.Dir,
-		Env:                    d.envToCmdArg(),
-		RedirectStdout:         d.RedirectStdout,
-		RedirectStderr:         d.RedirectStderr,
-		RestartPolicy:          d.RestartPolicy,
+		Command:        d.Command[0],
+		Args:           d.Command[1:],
+		Dir:            d.Dir,
+		Env:            d.envToCmdArg(),
+		RedirectStdout: d.RedirectStdout,
+		RedirectStderr: d.RedirectStderr,
+		RestartPolicy:  d.RestartPolicy,
 	}
 
 	replicas := d.Replicas

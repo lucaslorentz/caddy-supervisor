@@ -13,7 +13,7 @@ type Definition struct {
 	Replicas               int
 	KeepRunning            bool `json:"keep_running"`
 	Dir                    string
-	Env                    []string
+	Env                    map[string]string
 	RedirectStdout         string        `json:"redirect_stdout"`
 	RedirectStderr         string        `json:"redirect_stderr"`
 	RestartPolicy          RestartPolicy `json:"restart_policy"`
@@ -30,7 +30,7 @@ func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 		Command:                d.Command[0],
 		Args:                   d.Command[1:],
 		Dir:                    d.Dir,
-		Env:                    d.Env,
+		Env:                    d.envToCmdArg(),
 		RedirectStdout:         d.RedirectStdout,
 		RedirectStderr:         d.RedirectStderr,
 		RestartPolicy:          d.RestartPolicy,
@@ -85,4 +85,16 @@ func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 	}
 
 	return supervisors, nil
+}
+
+func (d Definition) envToCmdArg() []string {
+	env := make([]string, len(d.Env))
+	i := 0
+
+	for key, value := range d.Env {
+		env[i] = fmt.Sprintf("%s=%s", key, value)
+		i++
+	}
+
+	return env
 }

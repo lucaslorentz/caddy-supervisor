@@ -22,7 +22,7 @@
         {
           "command": ["php-fpm"],
           "dir":  ".",
-          "env": ["ADDITIONAL_ENV=1"],
+          "env": {"ADDITIONAL_ENV": "1"},
           "redirect_stdout":  "stdout",
           "redirect_stderr": "stderr",
           "restart_policy":  "always",

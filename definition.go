@@ -13,26 +13,26 @@ type Definition struct {
 	// Supports template.
 	Command []string `json:"command"`
 	// Replicas control how many instances of Command should run.
-	Replicas int `json:"replicas"`
+	Replicas int `json:"replicas,omitempty"`
 	// Dir defines the working directory the command should be executed in.
 	// Supports template.
 	// Default: current working dir
-	Dir string `json:"dir"`
+	Dir string `json:"dir,omitempty"`
 	// Env declares environment variables that should be passed to command.
 	// Supports template.
-	Env map[string]string `json:"env"`
+	Env map[string]string `json:"env,omitempty"`
 	// RedirectStdout is the file where Command stdout is written. Use "stdout" to redirect to caddy stdout.
-	RedirectStdout string `json:"redirect_stdout"`
+	RedirectStdout string `json:"redirect_stdout,omitempty"`
 	// RedirectStderr is the file where Command stderr is written. Use "stderr" to redirect to caddy stderr.
-	RedirectStderr string `json:"redirect_stderr"`
+	RedirectStderr string `json:"redirect_stderr,omitempty"`
 	// RestartPolicy define under which conditions the command should be restarted after exit.
 	// Valid values:
 	//  - **never**: do not restart the command
 	//  - **on_failure**: restart if exit code is not 0
 	//  - **always**: always restart
-	RestartPolicy RestartPolicy `json:"restart_policy"`
+	RestartPolicy RestartPolicy `json:"restart_policy,omitempty"`
 	// TerminationGracePeriod defines the amount of time to wait for Command graceful termination before killing it. Ex: 10s
-	TerminationGracePeriod string `json:"termination_grace_period"`
+	TerminationGracePeriod string `json:"termination_grace_period,omitempty"`
 }
 
 // ToSupervisors creates supervisors from the Definition (one per replica) and applies templates where needed

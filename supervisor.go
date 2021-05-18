@@ -58,10 +58,19 @@ func (s *Supervisor) Run() {
 			s.logger.Error("cannot setup stderr redirection", zap.Error(err), zap.String("file", s.Options.RedirectStderr))
 		}
 
-		s.logger.Info("starting process")
-
 		start := time.Now()
-		err := s.cmd.Run()
+		err := s.cmd.Start()
+
+		failedAtStart := false
+		if err != nil {
+			s.logger.Error("failed to start process", zap.Error(err))
+			failedAtStart = true
+		} else {
+			s.logger.Info("process started", zap.Int("pid", s.cmd.Process.Pid))
+
+			err = s.cmd.Wait()
+		}
+
 		duration := time.Now().Sub(start)
 
 		for _, fn := range afterRun {
@@ -69,7 +78,9 @@ func (s *Supervisor) Run() {
 		}
 
 		if err != nil {
-			s.logger.Error("process exited with error", zap.Error(err), zap.Duration("duration", duration))
+			if !failedAtStart {
+				s.logger.Error("process exited with error", zap.Error(err), zap.Duration("duration", duration))
+			}
 		} else {
 			s.logger.Info("process exited", zap.Duration("duration", duration))
 		}

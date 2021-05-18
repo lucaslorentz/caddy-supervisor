@@ -39,8 +39,6 @@ type Definition struct {
 func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 	var supervisors []*Supervisor
 
-	cmd := strings.Join(d.Command, " ")
-
 	opts := &Options{
 		Command:        d.Command[0],
 		Args:           d.Command[1:],
@@ -92,7 +90,7 @@ func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 		supervisor := &Supervisor{
 			Options: templatedOpts,
 			logger: logger.
-				With(zap.String("command", cmd)).
+				With(zap.Strings("command", d.Command)).
 				With(zap.Int("replica", templatedOpts.Replica)),
 		}
 

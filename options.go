@@ -18,8 +18,8 @@ type Options struct {
 	Args                   []string
 	Dir                    string
 	Env                    []string
-	RedirectStdout         string
-	RedirectStderr         string
+	RedirectStdout         OutputTarget
+	RedirectStderr         OutputTarget
 	RestartPolicy          RestartPolicy
 	TerminationGracePeriod time.Duration
 }
@@ -41,7 +41,7 @@ func (options Options) processTemplates() (Options, error) {
 	var err error
 	var tplErrors []string
 
-	handleError := func (option string, e error) {
+	handleError := func(option string, e error) {
 		if e != nil {
 			tplErrors = append(tplErrors, fmt.Sprintf("%s: %s", option, e))
 		}

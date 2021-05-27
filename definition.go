@@ -1,6 +1,7 @@
 package supervisor
 
 import (
+	"errors"
 	"fmt"
 	"go.uber.org/zap"
 	"strings"
@@ -22,9 +23,9 @@ type Definition struct {
 	// Supports template.
 	Env map[string]string `json:"env,omitempty"`
 	// RedirectStdout is the file where Command stdout is written. Use "stdout" to redirect to caddy stdout.
-	RedirectStdout string `json:"redirect_stdout,omitempty"`
+	RedirectStdout *OutputTarget `json:"redirect_stdout,omitempty"`
 	// RedirectStderr is the file where Command stderr is written. Use "stderr" to redirect to caddy stderr.
-	RedirectStderr string `json:"redirect_stderr,omitempty"`
+	RedirectStderr *OutputTarget `json:"redirect_stderr,omitempty"`
 	// RestartPolicy define under which conditions the command should be restarted after exit.
 	// Valid values:
 	//  - **never**: do not restart the command
@@ -35,18 +36,35 @@ type Definition struct {
 	TerminationGracePeriod string `json:"termination_grace_period,omitempty"`
 }
 
+type OutputTarget struct {
+	// Type is how the output should be redirected
+	// Valid values:
+	//   - **null**: discard outputs
+	//   - **stdout**: redirect output to caddy process stdout
+	//   - **stderr**: redirect output to caddy process stderr
+	//   - **file**: redirect output to a file, if selected File field is required
+	Type string `json:"type,omitempty"`
+	// File is the file where outputs should be written. This is used only when Type is "file".
+	File string `json:"file,omitempty"`
+}
+
+const (
+	OutputTypeStdout = "stdout"
+	OutputTypeStderr = "stderr"
+	OutputTypeNull   = "null"
+	OutputTypeFile   = "file"
+)
+
 // ToSupervisors creates supervisors from the Definition (one per replica) and applies templates where needed
 func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 	var supervisors []*Supervisor
 
 	opts := &Options{
-		Command:        d.Command[0],
-		Args:           d.Command[1:],
-		Dir:            d.Dir,
-		Env:            d.envToCmdArg(),
-		RedirectStdout: d.RedirectStdout,
-		RedirectStderr: d.RedirectStderr,
-		RestartPolicy:  d.RestartPolicy,
+		Command:       d.Command[0],
+		Args:          d.Command[1:],
+		Dir:           d.Dir,
+		Env:           d.envToCmdArg(),
+		RestartPolicy: d.RestartPolicy,
 	}
 
 	replicas := d.Replicas
@@ -59,12 +77,22 @@ func (d Definition) ToSupervisors(logger *zap.Logger) ([]*Supervisor, error) {
 		opts.RestartPolicy = RestartAlways
 	}
 
-	if opts.RedirectStdout == "" {
-		opts.RedirectStdout = "stdout"
+	if d.RedirectStdout == nil {
+		opts.RedirectStdout = OutputTarget{Type: OutputTypeStdout}
+	} else {
+		if err := validateOutputTarget(*d.RedirectStdout); err != nil {
+			return supervisors, err
+		}
+		opts.RedirectStdout = *d.RedirectStderr
 	}
 
-	if opts.RedirectStderr == "" {
-		opts.RedirectStderr = "stderr"
+	if d.RedirectStderr == nil {
+		opts.RedirectStderr = OutputTarget{Type: OutputTypeStderr}
+	} else {
+		if err := validateOutputTarget(*d.RedirectStderr); err != nil {
+			return supervisors, err
+		}
+		opts.RedirectStderr = *d.RedirectStderr
 	}
 
 	if d.TerminationGracePeriod == "" {
@@ -110,4 +138,30 @@ func (d Definition) envToCmdArg() []string {
 	}
 
 	return env
+}
+
+func validateOutputTarget(target OutputTarget) error {
+	switch target.Type {
+	case OutputTypeNull, OutputTypeStdout, OutputTypeStderr:
+		return nil
+	case OutputTypeFile:
+		if target.File == "" {
+			return errors.New("invalid output target, file should be defined")
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("unsupported output target type '%s', allowed: null, stderr, stdout, file", target.Type)
+}
+
+func (t OutputTarget) string() string {
+	switch t.Type {
+	case OutputTypeNull, OutputTypeStdout, OutputTypeStderr:
+		return t.Type
+	case OutputTypeFile:
+		return fmt.Sprintf("file(%s)", t.File)
+	default:
+		return "unknown"
+	}
 }

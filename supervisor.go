@@ -1,6 +1,8 @@
 package supervisor
 
 import (
+	"errors"
+	"fmt"
 	"go.uber.org/zap"
 	"os"
 	"os/exec"
@@ -34,7 +36,7 @@ func (s *Supervisor) Run() {
 		s.cmd = exec.Command(s.Options.Command, s.Options.Args...)
 		s.cmd.SysProcAttr = &syscall.SysProcAttr{
 			Setpgid: true,
-			Pgid: 0,
+			Pgid:    0,
 		}
 		s.cmd.Env = append(os.Environ(), s.Options.Env...)
 
@@ -48,14 +50,14 @@ func (s *Supervisor) Run() {
 			s.cmd.Stdout = outputFile
 			afterRun = append(afterRun, closeFile)
 		} else {
-			s.logger.Error("cannot setup stdout redirection", zap.Error(err), zap.String("file", s.Options.RedirectStdout))
+			s.logger.Error("cannot setup stdout redirection", zap.Error(err), zap.String("target", s.Options.RedirectStdout.string()))
 		}
 
 		if outputFile, closeFile, err := getOutputFile(s.Options.RedirectStderr); err == nil {
 			s.cmd.Stderr = outputFile
 			afterRun = append(afterRun, closeFile)
 		} else {
-			s.logger.Error("cannot setup stderr redirection", zap.Error(err), zap.String("file", s.Options.RedirectStderr))
+			s.logger.Error("cannot setup stderr redirection", zap.Error(err), zap.String("target", s.Options.RedirectStderr.string()))
 		}
 
 		start := time.Now()
@@ -152,25 +154,30 @@ func cmdIsRunning(cmd *exec.Cmd) bool {
 	return cmd != nil && cmd.Process != nil && (cmd.ProcessState == nil || !cmd.ProcessState.Exited())
 }
 
-func getOutputFile(value string) (*os.File, func(), error) {
-	if value == "" {
+func getOutputFile(target OutputTarget) (*os.File, func(), error) {
+	switch target.Type {
+	case OutputTypeNull:
 		return nil, emptyFunc, nil
-	}
-
-	switch value {
-	case "stdout":
+	case OutputTypeStdout:
 		return os.Stdout, emptyFunc, nil
-	case "stderr":
+	case OutputTypeStderr:
 		return os.Stderr, emptyFunc, nil
-	default:
-		outFile, err := os.OpenFile(value, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	case OutputTypeFile:
+		if target.File == "" {
+			return nil, nil, errors.New("invalid output target, file should be defined")
+		}
+
+		outFile, err := os.OpenFile(target.File, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 		if err != nil {
 			return nil, nil, err
 		}
+
 		return outFile, func() {
 			outFile.Close()
 		}, nil
 	}
+
+	return nil, emptyFunc, fmt.Errorf("unsupported output target type '%s', allowed: null, stderr, stdout, file", target.Type)
 }
 
 func increaseRestartDelay(restartDelay time.Duration) time.Duration {

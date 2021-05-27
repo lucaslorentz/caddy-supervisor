@@ -33,8 +33,8 @@ For every process in the**supervisor** caddyfile directive a command is executed
       
       restart_policy always # default to 'always', other values allowed: 'never', 'on_failure'
       
-      redirect_stdout /var/log/fpm.log       # redirect command stdout to a file. Use "stdout" to redirect to caddy stdout
-      redirect_stderr /var/log/fpm-error.log # redirect command stderr to a file. Use "stderr" to redirect to caddy stderr
+      redirect_stdout file /var/log/fpm.log       # redirect command stdout to a file. Default to caddy `stdout`
+      redirect_stderr file /var/log/fpm-error.log # redirect command stderr to a file. Default to caddy `stderr`
       
       termination_grace_period 30s # default to '10s', amount of time to wait for application graceful termination before killing it
       
@@ -54,9 +54,13 @@ mysite.com
 - **command**: the command to be executed. _Supports template_.
 - **dir**: the working directory the command should be executed in. _Supports template_.
 - **env**: declare environment variable that should be passed to command. This property can be repeated. _Supports template_.
-- **redirect_stdout**: redirect command stdout to a file. Use "stdout" to redirect to caddy stdout
-- **redirect_stderr**: redirect command stderr to a file. Use "stderr" to redirect to caddy stderr
-- **restart_policy**: define under which conditions the command should be restarted after exit. Valid values:
+- **redirect_stdout**: redirect command stdout. Default: `stdout`, Possible values:
+  - **null**: discard output
+  - **stdout**: redirect to the caddy process stdout
+  - **stderr**: redirect to the caddy process stderr
+  - **file /path/to/file**: redirect output to a file
+- **redirect_stderr**: redirect command stderr. Default: `stderr`, See above for possible values.
+- **restart_policy**: define under which conditions the command should be restarted after exit. Default: `always` Valid values:
   - **never**: do not restart the command
   - **on_failure**: restart if exit code is not 0
   - **always**: always restart

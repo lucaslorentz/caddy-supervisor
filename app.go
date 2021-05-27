@@ -17,8 +17,8 @@ func init() {
 }
 
 type App struct {
-	Supervise []Definition `json:"supervise,omitempty"`
-	log       *zap.Logger
+	Supervise   []Definition `json:"supervise,omitempty"`
+	log         *zap.Logger
 	supervisors []*Supervisor
 }
 

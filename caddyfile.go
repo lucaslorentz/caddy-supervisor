@@ -37,7 +37,7 @@ func parseSupervisor(d *caddyfile.Dispenser, _ interface{}) (interface{}, error)
 	for d.NextBlock(0) {
 		def := Definition{}
 
-		def.Command = append([]string{ d.Val() }, d.RemainingArgs()...)
+		def.Command = append([]string{d.Val()}, d.RemainingArgs()...)
 
 		if len(def.Command) == 0 {
 			return nil, d.ArgErr()
@@ -51,13 +51,21 @@ func parseSupervisor(d *caddyfile.Dispenser, _ interface{}) (interface{}, error)
 					return nil, d.ArgErr()
 				}
 			case "redirect_stdout":
-				if !d.Args(&def.RedirectStdout) {
-					return nil, d.ArgErr()
+				target, err := parseOutpoutRedirect(d)
+
+				if err != nil {
+					return nil, err
 				}
+
+				def.RedirectStdout = target
 			case "redirect_stderr":
-				if !d.Args(&def.RedirectStderr) {
-					return nil, d.ArgErr()
+				target, err := parseOutpoutRedirect(d)
+
+				if err != nil {
+					return nil, err
 				}
+
+				def.RedirectStderr = target
 			case "restart_policy":
 				var p string
 
@@ -125,4 +133,24 @@ func parseSupervisor(d *caddyfile.Dispenser, _ interface{}) (interface{}, error)
 		Name:  "supervisor",
 		Value: caddyconfig.JSON(app, nil),
 	}, nil
+}
+
+func parseOutpoutRedirect(d *caddyfile.Dispenser) (*OutputTarget, error) {
+	if !d.NextArg() {
+		return nil, d.ArgErr()
+	}
+
+	switch d.Val() {
+	case OutputTypeNull, OutputTypeStdout, OutputTypeStderr:
+		return &OutputTarget{Type: d.Val()}, nil
+	case OutputTypeFile:
+		var file string
+		if !d.Args(&file) {
+			return nil, d.ArgErr()
+		}
+
+		return &OutputTarget{Type: OutputTypeFile, File: file}, nil
+	default:
+		return nil, d.Errf("target should be either '%s', '%s', '%s',  or '%s': '%s' given", OutputTypeNull, OutputTypeStdout, OutputTypeStderr, OutputTypeFile, d.Val())
+	}
 }

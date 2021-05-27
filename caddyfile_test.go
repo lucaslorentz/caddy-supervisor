@@ -111,12 +111,12 @@ func Test_parseSupervisor(t *testing.T) {
 			expectError: "Testfile:4 - Error during parsing: Wrong argument count or unexpected line ending after 'HELLO_WORLD'",
 		},
 		{
-			name: "output redirections",
+			name: "output redirections to file",
 			givenCaddyfile: `
 				supervisor {
 				  php-fpm --fpm-config=fpm-8.0.2.ini {
-					redirect_stdout fpm-stdout.log
-					redirect_stderr fpm-stderr.log
+					redirect_stdout file fpm-stdout.log
+					redirect_stderr file fpm-stderr.log
 				  }
 				}
 			`,
@@ -125,8 +125,50 @@ func Test_parseSupervisor(t *testing.T) {
 					"supervise": [
 						{
 							"command":["php-fpm","--fpm-config=fpm-8.0.2.ini"],
-							"redirect_stdout": "fpm-stdout.log",
-							"redirect_stderr": "fpm-stderr.log"
+							"redirect_stdout": {"type": "file", "file": "fpm-stdout.log"},
+							"redirect_stderr": {"type": "file", "file": "fpm-stderr.log"}
+						}
+					]
+				}
+			`,
+		},
+		{
+			name: "output redirections to std",
+			givenCaddyfile: `
+				supervisor {
+				  php-fpm --fpm-config=fpm-8.0.2.ini {
+					redirect_stdout stdout
+					redirect_stderr stderr
+				  }
+				}
+			`,
+			expectJson: `
+				{
+					"supervise": [
+						{
+							"command":["php-fpm","--fpm-config=fpm-8.0.2.ini"],
+							"redirect_stdout": {"type": "stdout"},
+							"redirect_stderr": {"type": "stderr"}
+						}
+					]
+				}
+			`,
+		},
+		{
+			name: "output redirections to std",
+			givenCaddyfile: `
+				supervisor {
+				  php-fpm --fpm-config=fpm-8.0.2.ini {
+					redirect_stdout null
+				  }
+				}
+			`,
+			expectJson: `
+				{
+					"supervise": [
+						{
+							"command":["php-fpm","--fpm-config=fpm-8.0.2.ini"],
+							"redirect_stdout": {"type": "null"}
 						}
 					]
 				}

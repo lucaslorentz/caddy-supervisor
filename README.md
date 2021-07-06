@@ -138,3 +138,9 @@ xcaddy build \
 
 - Dedicated Caddyfile support (Supervisorfile)
 - Send processes outputs to Caddy logs
+
+## Credits
+
+This package is continuation of https://github.com/lucaslorentz/caddy-supervisor which only supports Caddy v1.
+
+Thank you @lucaslorentz for the original work ❤️

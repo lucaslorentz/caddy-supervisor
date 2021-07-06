@@ -1,23 +1,12 @@
-# caddy-supervisor [![Build Status](https://travis-ci.org/lucaslorentz/caddy-supervisor.svg?branch=master)](https://travis-ci.org/lucaslorentz/caddy-supervisor)
+# Caddy Supervisor 
 
-## Introduction
-This plugin enables caddy to run and supervise background processes.
+[![Build Status](https://github.com/baldinof/caddy-supervisor/actions/workflows/ci.yaml/badge.svg)](hthttps://github.com/Baldinof/caddy-supervisor/actions/workflows/ci.yaml)
+
+A module to run and supervise background processes from Caddy
 
 ## How it works
-For every process in the**supervisor** caddyfile directive a command is executed in background and killed when caddy stops.
 
-## WIP for caddy-v2 module
- TODO :
-
-- [x] Supervisor module
-- [ ] Caddyfile support
-  - [x] HTTP
-  - [ ] Dedicated
-- [ ] Tests
-  - [x] Caddyfile parsing
-  - [ ] supervisor
-- [x] Updated README
-- [ ] CI / Github Actions
+For every process in the **supervisor** caddyfile directive a command is executed in background and killed when caddy stops.
 
 ## Full HTTP Cadyfile example
 
@@ -98,7 +87,26 @@ That means that when the command fail, it will be restarted with a delay of 0 se
 If the command runs stable for at least 10 minutes, the restart delay is reset to 0 seconds.
 
 ## Examples
+
+PHP server (useful if you want a single container PHP application with php-fpm):
+
+```Caddyfile
+{
+  supervisor {
+    php-fpm
+  }
+}
+
+example.com
+
+php_fastcgi 127.0.0.1:9000
+root * .
+encode gzip
+file_server
+```
+
 AspNet Core application on windows:
+
 ```
 {
   supervisor {
@@ -112,9 +120,9 @@ AspNet Core application on windows:
   }
 }
 
-example.com {
-  reverse_proxy localhost:5000
-}
+example.com
+
+reverse_proxy localhost:5000
 ```
 
 ## Building it
@@ -125,3 +133,8 @@ Use the `xcaddy` tool to build a version of caddy with this module:
 xcaddy build \
     --with github.com/baldinof/caddy-supervisor
 ```
+
+## Todo
+
+- Dedicated Caddyfile support (Supervisorfile)
+- Send processes outputs to Caddy logs

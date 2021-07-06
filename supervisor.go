@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 )
 
@@ -34,10 +33,7 @@ func (s *Supervisor) Run() {
 
 	for s.keepRunning {
 		s.cmd = exec.Command(s.Options.Command, s.Options.Args...)
-		s.cmd.SysProcAttr = &syscall.SysProcAttr{
-			Setpgid: true,
-			Pgid:    0,
-		}
+		configureSysProcAttr(s.cmd)
 		s.cmd.Env = append(os.Environ(), s.Options.Env...)
 
 		if s.Options.Dir != "" {

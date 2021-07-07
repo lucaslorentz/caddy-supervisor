@@ -1,5 +1,9 @@
 # caddy-supervisor [![Build Status](https://travis-ci.org/lucaslorentz/caddy-supervisor.svg?branch=master)](https://travis-ci.org/lucaslorentz/caddy-supervisor)
 
+## Caddy V2!
+
+New versions and caddy V2 support at https://github.com/Baldinof/caddy-supervisor/.
+
 ## Introduction
 This plugin enables caddy to run and supervise background processes.
 
